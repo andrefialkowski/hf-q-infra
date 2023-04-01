@@ -27,19 +27,19 @@ resource "aws_db_instance" "mydb_hackaton" {
   instance_class       = "db.t3.micro"
   username             = "user"
   password             = "password"
-  skip_final_snapshot  = true
+  skip_final_snapshot  = false
 }
 
-resource "aws_s3_bucket" "b" {
+resource "aws_s3_bucket" "hackatonfiapgrupoq" {
   bucket = "my-tf-test-bucket"
 
   tags = {
-    Name        = "hackaton bucket"
+    Name        = "hackatonfiapgrupoq"
   }
 }
 
 resource "aws_s3_bucket_acl" "example" {
-  bucket = aws_s3_bucket.b.id
+  bucket = aws_s3_bucket.hackatonfiapgrupoq.id
   acl    = "private"
 }
 
