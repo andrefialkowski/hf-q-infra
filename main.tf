@@ -30,11 +30,11 @@ resource "aws_db_instance" "mydb_hackaton" {
   skip_final_snapshot  = true
 }
 
-resource "aws_ecs_cluster" "fiap" {
+/* resource "aws_ecs_cluster" "fiap" {
   name = "fiapHackaton"
 
   setting {
     name  = "fiapHackaton"
     value = "enabled"
   }
-}
+} */
