@@ -1,14 +1,14 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: HashiCorp - Setup Terraform
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "develop" ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -22,19 +22,59 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-          
-      - name: HashiCorp - Setup Terraform
-        # You may pin to the exact commit or the version.
-        # uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
         uses: hashicorp/setup-terraform@v2.0.3
-        with:
-          # The hostname of a Terraform Cloud/Enterprise instance to place within the credentials block of the Terraform CLI configuration file. Defaults to `app.terraform.io`.
-          cli_config_credentials_hostname: app.terraform.io # optional, default is app.terraform.io
-          # The API token for a Terraform Cloud/Enterprise instance to place within the credentials block of the Terraform CLI configuration file.
-          cli_config_credentials_token: Token:5CvsmylIJsG0xg.atlasv1.hscUZTF98hgxQjuRVUyjjh9w3KwxuV3JS6sqSHVJVIP1EVWsjaqXnm8Srm483MPWXFk # optional
-          # The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.
-          terraform_version: v1.4.4 # optional, default is latest
-          # Whether or not to install a wrapper to wrap subsequent calls of the `terraform` binary and expose its STDOUT, STDERR, and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to `true`.
-          terraform_wrapper: true # optional, default is true   
+
+         - name:Terraform fmt
+              id:fmt
+              run:terraform fmt -check
+              continue-on-error:true
+
+         - name:Terraform Init
+           id:init
+           run:terraform init
+
+         - name:Terraform Validate
+            id:validate
+            run:terraform validate -no-color
+
+          - name:Terraform Plan
+            id:plan
+            run:terraform plan -no-color
+            continue-on-error:true
+       
+         - uses:actions/github-script@v6
+            if:github.event_name == 'pull_request'
+            env:
+              PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+            with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              script: |
+                const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+                #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+                #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+                <details><summary>Validation Output</summary>
+
+                \`\`\`\n
+                ${{ steps.validate.outputs.stdout }}
+                \`\`\`
+
+                </details>
+
+                #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+
+                <details><summary>Show Plan</summary>
+
+                \`\`\`\n
+                ${process.env.PLAN}
+                \`\`\`
+
+                </details>
+
+                *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.tf_actions_working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: output
+                })
