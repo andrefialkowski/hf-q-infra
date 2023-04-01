@@ -35,3 +35,10 @@ resource "aws_s3_bucket" "deployment_bucket" {
       Environment = "Dev"
     }
 }
+
+resource "aws_ecs_cluster" "main" {
+  name = "my-cluster"
+  tags = {
+    "Custo" : "hackaton"
+  }
+}
