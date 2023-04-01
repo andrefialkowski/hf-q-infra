@@ -19,19 +19,19 @@ resource "aws_instance" "dev" {
       Name = "dev${count.index}"
     }
   }
-resource "aws_db_instance" "mydb_hackaton" {
-  allocated_storage    = 10
-  db_name              = "mydb_hackaton"
-  engine               = "mysql"
-  engine_version       = "8.0.32"
-  instance_class       = "db.t3.micro"
-  username             = "user"
-  password             = "password"
-  skip_final_snapshot  = false
-}
+# resource "aws_db_instance" "mydb_hackaton" {
+#   allocated_storage    = 10
+#   db_name              = "mydb_hackaton"
+#   engine               = "mysql"
+#   engine_version       = "8.0.32"
+#   instance_class       = "db.t3.micro"
+#   username             = "user"
+#   password             = "password"
+#   skip_final_snapshot  = false
+# }
 
 resource "aws_s3_bucket" "hackatonfiapgrupoq" {
-  bucket = "my-tf-test-bucket"
+  bucket = "hackatonfiapgrupoq"
 
   tags = {
     Name        = "hackatonfiapgrupoq"
