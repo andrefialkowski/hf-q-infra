@@ -19,3 +19,22 @@ resource "aws_instance" "dev" {
       Name = "dev${count.index}"
     }
   }
+resource "aws_db_instance" "mydb_hackaton" {
+  allocated_storage    = 10
+  db_name              = "mydb_hackaton"
+  engine               = "mysql"
+  engine_version       = "8.0.32"
+  instance_class       = "db.t3.micro"
+  username             = "user"
+  password             = "password"
+  skip_final_snapshot  = true
+}
+
+resource "aws_ecs_cluster" "fiap" {
+  name = "fiapHackaton"
+
+  setting {
+    name  = "fiapHackaton"
+    value = "enabled"
+  }
+}
