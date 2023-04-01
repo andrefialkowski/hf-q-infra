@@ -1,40 +1,49 @@
-# This is a basic workflow to help you get started with Actions
+name: 'Terraform'
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
+    branches: [ "develop" ]
   pull_request:
     branches: [ "master" ]
+permissions:
+  contents: write
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  terraform:
+    name: 'Terraform'
     runs-on: ubuntu-latest
+    environment: production
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-          
-      - name: HashiCorp - Setup Terraform
-        # You may pin to the exact commit or the version.
-        # uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
-        uses: hashicorp/setup-terraform@v2.0.3
-        with:
-          # The hostname of a Terraform Cloud/Enterprise instance to place within the credentials block of the Terraform CLI configuration file. Defaults to `app.terraform.io`.
-          cli_config_credentials_hostname: app.terraform.io # optional, default is app.terraform.io
-          # The API token for a Terraform Cloud/Enterprise instance to place within the credentials block of the Terraform CLI configuration file.
-          cli_config_credentials_token: Token:5CvsmylIJsG0xg.atlasv1.hscUZTF98hgxQjuRVUyjjh9w3KwxuV3JS6sqSHVJVIP1EVWsjaqXnm8Srm483MPWXFk # optional
-          # The version of Terraform CLI to install. Instead of full version string you can also specify constraint string starting with "<" (for example `<1.13.0`) to install the latest version satisfying the constraint. A value of `latest` will install the latest version of Terraform CLI. Defaults to `latest`.
-          terraform_version: v1.4.4 # optional, default is latest
-          # Whether or not to install a wrapper to wrap subsequent calls of the `terraform` binary and expose its STDOUT, STDERR, and exit code as outputs named `stdout`, `stderr`, and `exitcode` respectively. Defaults to `true`.
-          terraform_wrapper: true # optional, default is true   
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: 5CvsmylIJsG0xg.atlasv1.hscUZTF98hgxQjuRVUyjjh9w3KwxuV3JS6sqSHVJVIP1EVWsjaqXnm8Srm483MPWXFk
+
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: terraform init
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan -input=false
+
+      # On push to "master", build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/"master"' && github.event_name == 'push'
+      run: terraform apply -auto-approve -input=false
