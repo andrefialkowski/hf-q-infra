@@ -30,6 +30,20 @@ resource "aws_db_instance" "mydb_hackaton" {
   skip_final_snapshot  = true
 }
 
+resource "aws_s3_bucket" "b" {
+  bucket = "my-tf-test-bucket"
+
+  tags = {
+    Name        = "hackaton bucket"
+  }
+}
+
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.b.id
+  acl    = "private"
+}
+
+
 /* resource "aws_ecs_cluster" "fiap" {
   name = "fiapHackaton"
 
