@@ -43,9 +43,9 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-data "aws_ecs_cluster" "main" {
-  cluster_name = "my-cluster"
-}
+#data "aws_ecs_cluster" "main" {
+#  cluster_name = "my-cluster"
+#}
 
 data "aws_vpc" "default" {
   id = "vpc-0e36b096e7370e9f8"
