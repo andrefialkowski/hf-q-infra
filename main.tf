@@ -162,7 +162,7 @@ resource "aws_security_group" "hackaton_task" {
 
 resource "aws_ecs_service" "hackaton" {
   name            = "hackaton-service"
-  cluster         = data.aws_ecs_cluster.main.id
+  cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.hackaton.arn
   desired_count   = 1
   launch_type     = "FARGATE"
