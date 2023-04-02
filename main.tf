@@ -164,7 +164,7 @@ resource "aws_ecs_service" "hackaton" {
   name            = "hackaton-service"
   cluster         = data.aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.hackaton.arn
-  desired_count   = var.app_count
+  desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
